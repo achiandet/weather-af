@@ -15,5 +15,8 @@
   ],
   "dependencies": {
     "bootstrap": "v4.0.0-alpha.2"
+  },
+  "devDependencies": {
+    "tether": "^1.1.1"
   }
 }
