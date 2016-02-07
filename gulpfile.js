@@ -8,6 +8,7 @@ var gulp = require('gulp'),
     autoprefixer = require('gulp-autoprefixer'),
     browserSync = require('browser-sync'),
     reload = browserSync.reload,
+    del = require('del'),
     sass = require('gulp-sass');
 
 
@@ -34,16 +35,15 @@ gulp.task('html', function() {
 });
 
 
-
 // //////////////////////////////////////////////
 // Sass Task
 // //////////////////////////////////////////////
 gulp.task('sass', function() {
-  gulp.src('app/sass/**/*.scss')
+  gulp.src('app/scss/**/*.scss')
   .pipe(plumber())
   .pipe(autoprefixer())
   .pipe(sass({outputStyle: 'compressed'}).on('error', sass.logError))
-  .pipe(gulp.dest('app/scss'))
+  .pipe(gulp.dest('app/css'))
   .pipe(reload({stream:true}));
 });
 
@@ -54,20 +54,57 @@ gulp.task('sass', function() {
 gulp.task('browser-sync', function() {
   browserSync({
     server:{
-      baseDir: "./app"
+      baseDir: "./app/"
+    }
+  });
+});
+
+// Task to run build server for testing final app
+gulp.task('build:serve', function() {
+  browserSync({
+    server:{
+      baseDir: "./build/"
     }
   });
 });
 
 
 // //////////////////////////////////////////////
-// Watch Task
+// Watch Tasks
 // //////////////////////////////////////////////
 gulp.task('watch', function() {
   gulp.watch('app/js/**/*.js', ['scripts']);
   gulp.watch('app/scss/**/*.scss', ['sass']);
   gulp.watch('app/**/*.html', ['html']);
 });
+
+
+// //////////////////////////////////////////////
+// Build Tasks
+// //////////////////////////////////////////////
+
+// clean out all of the files and folders from build folder
+gulp.task('build:cleanfolder', function() {
+  del([
+    'build/**'
+  ]);
+});
+
+// task to create build dir for all files
+gulp.task('build:copy', ['build:cleanfolder'], function() {
+  return gulp.src('app/**/*/')
+  .pipe(gulp.dest('build/'));
+});
+
+// task to remove unwanted build files
+gulp.task('build:remove', ['build:copy'], function(cb) {
+  del([
+    'build/scss/',
+    'build/js/!(*.min.js)',
+  ], cb);
+});
+
+gulp.task('build', ['build:copy', 'build:remove']);
 
 
 // //////////////////////////////////////////////
